@@ -1,0 +1,6 @@
+area,chipid,lulc_category_from,lulc_category_to,changed_area,changed_area_normalized
+Israel,1_3_16,Bare ground,Solar Panel,4.490008578208723,0.904447254810061
+Israel,1_3_16,Bare ground,Crops,0.44292538620964567,0.0892209096408496
+Israel,1_3_16,Bare ground,Built Area,0.01189986814252444,0.00239705623867688
+Israel,1_3_16,Built Area,Bare ground,0.011798443762839646,0.00237662576506444
+Israel,1_3_16,Bare ground,Shrub & Scrub,0.007735246856654667,0.0015581535453481363

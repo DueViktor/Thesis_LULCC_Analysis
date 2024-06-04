@@ -1,0 +1,4 @@
+lulc_category_from,lulc_category_to,changed_area,changed_area_normalized
+Bare ground,Solar Panel,9.950799557490447,0.513147318213557
+Crops,Solar Panel,8.764631109980108,0.4519784488907611
+Built Area,Solar Panel,0.6762707100843637,0.03487423289568179
