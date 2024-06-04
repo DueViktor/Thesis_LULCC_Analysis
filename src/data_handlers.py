@@ -195,18 +195,18 @@ def add_wind_turbines():
     return wind_turbines, geometry_wkt
 
 
-def prepare_polygons_for_DB(wind_turbines, intersecting_chips,object_id_col="Møllenummer (GSRN)"):
+def prepare_polygons_for_DB(
+    wind_turbines, intersecting_chips, object_id_col="Møllenummer (GSRN)"
+):
     windmill_chips = gpd.overlay(wind_turbines, intersecting_chips, how="intersection")
 
-    #print("Inner Inner 1:", windmill_chips.columns)
+    # print("Inner Inner 1:", windmill_chips.columns)
     turbine_ids = windmill_chips[object_id_col].unique()
 
     turbine_chips = []
 
     for id in turbine_ids:
-        chipids = windmill_chips[windmill_chips[object_id_col] == id][
-            "chipid"
-        ].unique()
+        chipids = windmill_chips[windmill_chips[object_id_col] == id]["chipid"].unique()
         for chipid in chipids:
             dissolved_windmill_chip = windmill_chips[
                 (windmill_chips["chipid"] == chipid)
@@ -215,7 +215,9 @@ def prepare_polygons_for_DB(wind_turbines, intersecting_chips,object_id_col="Mø
             turbine_chips.append(dissolved_windmill_chip)
 
     try:
-        wind_turbine_chips = gpd.GeoDataFrame(pd.concat(turbine_chips), geometry="geometry")
+        wind_turbine_chips = gpd.GeoDataFrame(
+            pd.concat(turbine_chips), geometry="geometry"
+        )
     except:
         # Create empty GeoDataFrame with columns "data_origins","name_1","year","chipid","object_id_col","area","geometry"
         wind_turbine_chips = gpd.GeoDataFrame(
@@ -230,11 +232,10 @@ def prepare_polygons_for_DB(wind_turbines, intersecting_chips,object_id_col="Mø
             ]
         )
         return wind_turbine_chips
-    
 
-    joined = wind_turbines[
-        ["data_origins", object_id_col, "year", "area"]
-    ].merge(wind_turbine_chips, on=object_id_col, how="inner")
+    joined = wind_turbines[["data_origins", object_id_col, "year", "area"]].merge(
+        wind_turbine_chips, on=object_id_col, how="inner"
+    )
 
     db_ready_frame = joined[
         [
@@ -364,34 +365,51 @@ def read_all_tifs2geo(path, year="", area="Denmark", test=False):
 
 
 def process_wind_turbines(wind_turbines):
-    wind_turbines['Dato for oprindelig nettilslutning'] = wind_turbines['Dato for oprindelig nettilslutning'].dt.strftime('%Y-%m-%d')
-    wind_turbines['Dato for afmeldning'] = wind_turbines['Dato for afmeldning'].dt.strftime('%Y-%m-%d')
+    wind_turbines["Dato for oprindelig nettilslutning"] = wind_turbines[
+        "Dato for oprindelig nettilslutning"
+    ].dt.strftime("%Y-%m-%d")
+    wind_turbines["Dato for afmeldning"] = wind_turbines[
+        "Dato for afmeldning"
+    ].dt.strftime("%Y-%m-%d")
 
-    wind_turbines['geometry'] = wind_turbines.apply(lambda x: radial_polygon_from_point(x['lon'], x['lat'], x['Rotor-diameter (m)']/2), axis=1)
-    wind_turbines['name'] = 'Wind Turbine'
-    wind_turbines['data_origins'] = 'Energistyrelsen'
-    wind_turbines['area'] = 'Denmark'
-    
+    wind_turbines["geometry"] = wind_turbines.apply(
+        lambda x: radial_polygon_from_point(
+            x["lon"], x["lat"], x["Rotor-diameter (m)"] / 2
+        ),
+        axis=1,
+    )
+    wind_turbines["name"] = "Wind Turbine"
+    wind_turbines["data_origins"] = "Energistyrelsen"
+    wind_turbines["area"] = "Denmark"
+
     all_rows = []
-    
 
-    wind_turbines['Dato for afmeldning'].fillna('NaN', inplace=True)
-    for _,row in tqdm(wind_turbines.iterrows()):
-        start_year = row['Dato for oprindelig nettilslutning'][:4]
+    wind_turbines["Dato for afmeldning"].fillna("NaN", inplace=True)
+    for _, row in tqdm(wind_turbines.iterrows()):
+        start_year = row["Dato for oprindelig nettilslutning"][:4]
         if int(start_year) < 2016:
-            start_year = '2016'
-        if row['Dato for afmeldning'] != 'NaN':
-            end_year = row['Dato for afmeldning'][:4]
+            start_year = "2016"
+        if row["Dato for afmeldning"] != "NaN":
+            end_year = row["Dato for afmeldning"][:4]
         else:
-            end_year = '2024'
-        years_active = [str(i) for i in range(int(start_year), int(end_year)+1)]
+            end_year = "2024"
+        years_active = [str(i) for i in range(int(start_year), int(end_year) + 1)]
 
         for year in years_active:
-            row['year'] = year
-            cols = ['Møllenummer (GSRN)','Kapacitet (kW)','Rotor-diameter (m)','geometry', 'name', 'year','area','data_origins']
+            row["year"] = year
+            cols = [
+                "Møllenummer (GSRN)",
+                "Kapacitet (kW)",
+                "Rotor-diameter (m)",
+                "geometry",
+                "name",
+                "year",
+                "area",
+                "data_origins",
+            ]
             all_rows.append(row[cols])
-            
-    wind_turbines = gpd.GeoDataFrame(all_rows, geometry='geometry')
+
+    wind_turbines = gpd.GeoDataFrame(all_rows, geometry="geometry")
 
     return wind_turbines
 
@@ -473,4 +491,3 @@ def get_yearly_intersection(gdf_before, gdf_after):
 
 def get_turbine_photos(wind_turbine_df):
     pass
-

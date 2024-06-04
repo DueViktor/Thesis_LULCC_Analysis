@@ -14,6 +14,7 @@ def load_json(input_path: Path):
         data = json.load(f)
     return data
 
+
 def get_cordinates_from_address(address: str) -> tuple:
     geolocator = Nominatim(user_agent="geoapiExercises")
     location = geolocator.geocode(address)
@@ -22,5 +23,3 @@ def get_cordinates_from_address(address: str) -> tuple:
         return (location.latitude, location.longitude)
     else:
         return None, None
-
-   

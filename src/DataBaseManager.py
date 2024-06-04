@@ -15,13 +15,13 @@ from tqdm import tqdm
 
 from config import LAND_COVER_LEGEND
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from src.data_handlers import raster_dict2geo
 
 QUERY_CATALOG = {
     "read": {
-        "SUMMED_AREA_PER_YEAR_PER_AREA" : """
+        "SUMMED_AREA_PER_YEAR_PER_AREA": """
             SELECT 
                 area,
                 name,
@@ -57,7 +57,7 @@ QUERY_CATALOG = {
                 area, 
                 lulc_category_to, 
                 SUM(area_km2) DESC;""",
-        "chip_greater_than" : """
+        "chip_greater_than": """
             SELECT 
                 chipid, 
                 ST_Area(ST_Transform(ST_Union(geometries), __EPSG__)) / 1000000.0 AS area_sq_km
@@ -76,14 +76,14 @@ QUERY_CATALOG = {
     AND (year <= '_END_YEAR_-01-01' AND year >= '_START_YEAR_-01-01')
     AND (data_origins = 'DynamicWorld' OR data_origins = 'SATLAS')
     """,  # AND data_origins = 'DynamicWorld',
-    "GET_ONLY_DW_LANDCOVER": """SELECT * FROM lulc 
+        "GET_ONLY_DW_LANDCOVER": """SELECT * FROM lulc 
     WHERE 
     Area = '_AREA_'
     AND chipid in (_CHIPIDS_)
     AND (year <= '_END_YEAR_-01-01' AND year >= '_START_YEAR_-01-01')
     AND (data_origins = 'DynamicWorld')
     """,
-    "GET_AGGREGATED_LANDCOVER": """SELECT name, ST_Union(geometries) as geometries 
+        "GET_AGGREGATED_LANDCOVER": """SELECT name, ST_Union(geometries) as geometries 
                                    FROM lulc WHERE 
                                    and name  = ''
                                    data_origins = 'DynamicWorld' 
@@ -91,31 +91,27 @@ QUERY_CATALOG = {
                                    AND area = '_AREA_'
                                    GROUP BY name
                                    """,
-    "GET_ONLY_CHIPIDS_FROM_AREA":""" SELECT chipid,count(distinct year)  as num_years FROM lulc
+        "GET_ONLY_CHIPIDS_FROM_AREA": """ SELECT chipid,count(distinct year)  as num_years FROM lulc
                                         WHERE area='_AREA_' AND data_origins = 'DynamicWorld'
                                         group by chipid
                                         HAVING count(distinct year) = 8
                                         ORDER BY CAST(split_part(split_part(chipid, '_', 1), '-', 1) AS INTEGER)""",
-    "GET_CHIPIDS_FROM_AREA":""" SELECT DISTINCT chipid FROM lulc WHERE area = '_AREA_' 
+        "GET_CHIPIDS_FROM_AREA": """ SELECT DISTINCT chipid FROM lulc WHERE area = '_AREA_' 
                                 AND chipid not in (SELECT DISTINCT chipid from land_use_change
                                 WHERE area = '_AREA_' and year_from = _YEAR_FROM_ 
                                 AND year_to =  _YEAR_TO_)""",
-
-    "GET_LANDCOVER": """SELECT * FROM lulc
+        "GET_LANDCOVER": """SELECT * FROM lulc
                         WHERE area='_AREA_' AND year = '_YEAR_-01-01'
                         AND data_origins = 'DynamicWorld'""",
-    "GET_SATLAS_AND_DW_LANDCOVER": """SELECT * FROM lulc
+        "GET_SATLAS_AND_DW_LANDCOVER": """SELECT * FROM lulc
                         WHERE area='_AREA_' AND year = '_YEAR_-01-01'
                         AND data_origins = 'DynamicWorld' OR data_origins = 'SATLAS'""",
-
-    "GET_CHIP_LANDCOVER": """SELECT chipid,
+        "GET_CHIP_LANDCOVER": """SELECT chipid,
                                     name,
                                     ST_Union(geometries) AS geometries FROM lulc
                         WHERE area='_AREA_' AND year = '_YEAR_-01-01'
                         AND data_origins = 'DynamicWorld' AND chipid = '_CHIPID_'
                         GROUp BY chipid, name""",
-    
-
         "GET_DRIVE_FOLDERS": "SELECT foldername,area FROM drive_folders",
         "GET_EXISTING_CHIPS": """SELECT chipid,num_dates  FROM (
                             SELECT chipid,COUNT(distinct year) as num_dates 
@@ -144,10 +140,7 @@ QUERY_CATALOG = {
                                 AND year = '_YEAR_-01-01' 
                                 AND ST_Intersects(geometries, ST_GeomFromText('_GEOMETRY_', 4326))
                                 """,
-
-
-        "CALCULATE_LULC_INTERSECTION": 
-        """ 
+        "CALCULATE_LULC_INTERSECTION": """ 
         SELECT *,
        intersection_area_sq_km / preceding_area_sq_km * 100 AS percent_change
 FROM (
@@ -294,8 +287,8 @@ FROM (
 ORDER BY intersection_area_sq_km DESC;
 
 
-        """, # --WHERE preceding_year_name != current_year_name HAS BEEN REMOVED
-"GET_CHIP_GRAPH": """
+        """,  # --WHERE preceding_year_name != current_year_name HAS BEEN REMOVED
+        "GET_CHIP_GRAPH": """
                   SELECT area,chipid,lulc_category_from,lulc_category_to,sum(area_km2) as changed_area
                     FROM land_use_change luc
                     WHERE area_km2 > 0.001 AND 
@@ -304,7 +297,7 @@ ORDER BY intersection_area_sq_km DESC;
                     GROUP BY area,chipid,lulc_category_from,lulc_category_to
                     ORDER BY area,chipid,sum(area_km2) desc
                   """,
-"GET_SINGLE_CHIP_GRAPH": """
+        "GET_SINGLE_CHIP_GRAPH": """
                   SELECT area,chipid,lulc_category_from,lulc_category_to,sum(area_km2) as changed_area
                     FROM land_use_change luc
                     WHERE area_km2 > 0.001 AND 
@@ -314,7 +307,7 @@ ORDER BY intersection_area_sq_km DESC;
                     GROUP BY area,chipid,lulc_category_from,lulc_category_to
                     ORDER BY area,chipid,sum(area_km2) desc
                   """,
-    "GET_LANDCOVER_CHANGE": """
+        "GET_LANDCOVER_CHANGE": """
                             SELECT lulc_category_from,lulc_category_to,area_km2
                             FROM land_use_change
 
@@ -322,14 +315,13 @@ ORDER BY intersection_area_sq_km DESC;
                             AND lulc_category_from != lulc_category_to
 
                             """,
-    "GET_LANDCOVER_CHANGE_WITH_PARAMS": """
+        "GET_LANDCOVER_CHANGE_WITH_PARAMS": """
                             SELECT lulc_category_from,lulc_category_to,area_km2
                             FROM land_use_change
 
                             WHERE area='_AREA_' AND year_from = _YEAR_FROM_ AND year_to = _YEAR_TO_
                             """,
-
-    "GET_SOLAR_WIND_OVERLAP": """
+        "GET_SOLAR_WIND_OVERLAP": """
                                
 
                                 SELECT main.*,wind.wind_turbine_km2,solar.solar_panel_km2,
@@ -408,7 +400,6 @@ ORDER BY intersection_area_sq_km DESC;
 
                                     on main.area = solar.area AND main.year = solar.year
                                     """,
-
         "GET_LUC_VERIFICATION": """
                                                             
                                 SELECT year_from,year_to,lulc_category_from,lulc_category_to,SUM(area_km2) as area_km2, ST_Union(geom) as geometries from land_use_change 
@@ -427,20 +418,20 @@ ORDER BY intersection_area_sq_km DESC;
                                     
                                 GROUP BY year_from,year_to,lulc_category_from,lulc_category_to
 
-                                """
-        },
-        "write": {
-            "INSERT_LANDCOVER": """INSERT INTO landcover (Area, Name, Year, data_origins, ChipID, Geometry) VALUES ('_AREA_', '_NAME_', '_YEAR_', '_DATA_ORIGIN_', '_CHIPID_',')""",
-            "INSERT_DRIVE_FOLDER": """
+                                """,
+    },
+    "write": {
+        "INSERT_LANDCOVER": """INSERT INTO landcover (Area, Name, Year, data_origins, ChipID, Geometry) VALUES ('_AREA_', '_NAME_', '_YEAR_', '_DATA_ORIGIN_', '_CHIPID_',')""",
+        "INSERT_DRIVE_FOLDER": """
                     INSERT INTO drive_folders (area, foldername) 
                     VALUES ('_AREA_', '_FOLDERNAME_') 
                     """,
-            "INSERT_FINISHED_SUBPOLY": """
+        "INSERT_FINISHED_SUBPOLY": """
                     INSERT INTO sub_polygons (area, polygon_index) 
                     VALUES ('_AREA_', '_POLYGON_INDEX_') 
                     """,
-        },
-    }
+    },
+}
 
 
 class DriveManager:
@@ -608,22 +599,22 @@ class DBMS:
             remote_bind_address=("192.168.1.150", 5432),
         )
 
-    def handle_queries(self, query_name, params, func="read", geom_query=False,geom_col="geometries"):
+    def handle_queries(
+        self, query_name, params, func="read", geom_query=False, geom_col="geometries"
+    ):
         query = QUERY_CATALOG[func][query_name]
         for query_element, element_value in params.items():
             query = query.replace(query_element, element_value)
-        #print(query)
+        # print(query)
         if func == "write":
             return query
 
         if geom_query:
-            return gpd.GeoDataFrame.from_postgis(
-                query, self.engine, geom_col=geom_col
-            )
+            return gpd.GeoDataFrame.from_postgis(query, self.engine, geom_col=geom_col)
         else:
             return pd.read_sql(query, self.engine)
 
-    def read(self, query_name, params, geom_query=False,geom_col="geometries"):
+    def read(self, query_name, params, geom_query=False, geom_col="geometries"):
         self.server.start()
         local_port = str(self.server.local_bind_port)
 
@@ -633,7 +624,9 @@ class DBMS:
             )
         )
 
-        query_results = self.handle_queries(query_name, params, geom_query=geom_query,geom_col=geom_col)
+        query_results = self.handle_queries(
+            query_name, params, geom_query=geom_query, geom_col=geom_col
+        )
 
         self.server.stop()
 
@@ -664,8 +657,7 @@ class DBMS:
 
         return gdf
 
-    def add_land_use_change(self,gdf):
-
+    def add_land_use_change(self, gdf):
         self.server.start()
         local_port = str(self.server.local_bind_port)
 
@@ -675,18 +667,17 @@ class DBMS:
             )
         )
 
-
         dtypes = {
             "area": types.VARCHAR(255),
             "chipid": types.VARCHAR(255),
             "year_from": types.INTEGER,
             "year_to": types.INTEGER,
-            'lulc_category_from': types.VARCHAR(255),
-            'lulc_category_to': types.VARCHAR(255),
-            'percent_change': types.FLOAT,
-            'from_category_area_sq_km': types.FLOAT,
-            'area_km2': types.FLOAT,
-            "geom": Geometry("GEOMETRY", srid=4326)
+            "lulc_category_from": types.VARCHAR(255),
+            "lulc_category_to": types.VARCHAR(255),
+            "percent_change": types.FLOAT,
+            "from_category_area_sq_km": types.FLOAT,
+            "area_km2": types.FLOAT,
+            "geom": Geometry("GEOMETRY", srid=4326),
         }
 
         if "object_id" in gdf.columns:
@@ -694,7 +685,7 @@ class DBMS:
 
         # Use 'dtype' parameter to specify SQL types for the GeoDataFrame columns
         gdf.to_sql(
-            'land_use_change',
+            "land_use_change",
             self.engine,
             if_exists="append",
             index=False,
@@ -703,9 +694,7 @@ class DBMS:
 
         self.server.stop()
 
-
-    def add_add_change(self,gdf):
-
+    def add_add_change(self, gdf):
         self.server.start()
         local_port = str(self.server.local_bind_port)
 
@@ -715,18 +704,17 @@ class DBMS:
             )
         )
 
-
         dtypes = {
             "area": types.VARCHAR(255),
             "chipid": types.VARCHAR(255),
             "year_from": types.INTEGER,
             "year_to": types.INTEGER,
-            'lulc_category_from': types.VARCHAR(255),
-            'lulc_category_to': types.VARCHAR(255),
-            'percent_change': types.FLOAT,
-            'from_category_area_sq_km': types.FLOAT,
-            'area_km2': types.FLOAT,
-            "geom": Geometry("GEOMETRY", srid=4326)
+            "lulc_category_from": types.VARCHAR(255),
+            "lulc_category_to": types.VARCHAR(255),
+            "percent_change": types.FLOAT,
+            "from_category_area_sq_km": types.FLOAT,
+            "area_km2": types.FLOAT,
+            "geom": Geometry("GEOMETRY", srid=4326),
         }
 
         if "object_id" in gdf.columns:
@@ -734,7 +722,7 @@ class DBMS:
 
         # Use 'dtype' parameter to specify SQL types for the GeoDataFrame columns
         gdf.to_sql(
-            'land_use_change',
+            "land_use_change",
             self.engine,
             if_exists="append",
             index=False,

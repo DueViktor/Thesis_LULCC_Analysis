@@ -63,7 +63,6 @@ def projection_and_clusters(
     return None
 
 
-
 def distribution_of_countries_per_cluster(clustered_label, index_2_chip):
     """
     clustered_label: clustered.labels_ gives the cluster number for chip
@@ -73,7 +72,9 @@ def distribution_of_countries_per_cluster(clustered_label, index_2_chip):
     cluster_count = {}
 
     for cluster_name in set(clustered_label):
-        cluster_indices = [i for i, x in enumerate(clustered_label) if x == cluster_name]
+        cluster_indices = [
+            i for i, x in enumerate(clustered_label) if x == cluster_name
+        ]
         cluster_countries = [index_2_chip[i][0] for i in cluster_indices]
         country_counts = Counter(cluster_countries)
         cluster_count[cluster_name] = country_counts
@@ -83,18 +84,32 @@ def distribution_of_countries_per_cluster(clustered_label, index_2_chip):
     legend_handled = set()  # Set to track which countries have been added to the legend
     for cluster, country_count_dict in cluster_count.items():
         bottom_height = 0  # Initialize the bottom at 0 for each cluster
-        for country, count in sorted(country_count_dict.items(), key=lambda x: x[0]):  # Sort countries alphabetically
+        for country, count in sorted(
+            country_count_dict.items(), key=lambda x: x[0]
+        ):  # Sort countries alphabetically
             if country not in legend_handled:
-                ax.bar(cluster, count, bottom=bottom_height, label=country, color=COUNTRY_COLORS[country])
+                ax.bar(
+                    cluster,
+                    count,
+                    bottom=bottom_height,
+                    label=country,
+                    color=COUNTRY_COLORS[country],
+                )
                 legend_handled.add(country)  # Mark this country as added to the legend
             else:
-                ax.bar(cluster, count, bottom=bottom_height, color=COUNTRY_COLORS[country])
-            bottom_height += count  # Increase the bottom height by the count of the current country
+                ax.bar(
+                    cluster, count, bottom=bottom_height, color=COUNTRY_COLORS[country]
+                )
+            bottom_height += (
+                count  # Increase the bottom height by the count of the current country
+            )
 
     # Add legends, labels, and adjust ticks for clarity
     ax.set_xticks(list(cluster_count.keys()))
     ax.set_xticklabels(cluster_count.keys())
-    plt.legend(title="Country", bbox_to_anchor=(0.5, -0.05), loc='upper center', ncol=4)  # Adjust the position of the legend
+    plt.legend(
+        title="Country", bbox_to_anchor=(0.5, -0.05), loc="upper center", ncol=4
+    )  # Adjust the position of the legend
 
     plt.tight_layout()
     outpath = PLOTS_DIR / "embeddings/countries_per_cluster.png"
@@ -108,7 +123,6 @@ def distribution_of_countries_per_cluster(clustered_label, index_2_chip):
 def sankey_for_cluster_LCs(
     cluster_LCs: Dict[int, pd.DataFrame], titles: List[str] = None, tfidf_edition=False
 ) -> None:
-    
     plt.style.use("default")
 
     if titles is None:
@@ -125,7 +139,6 @@ def sankey_for_cluster_LCs(
             titles[idx],
             outpath=outpath,
         )
-
 
         # change outpath to csv
         outpath = outpath.with_suffix(".csv")

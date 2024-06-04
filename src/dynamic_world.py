@@ -16,8 +16,11 @@ from src.utils import authenticate_Google_Earth_Engine as authenticate
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+
 def default_global_gdf():
-    return gpd.GeoDataFrame(pd.DataFrame(columns=["chipid", "geometry"]), geometry="geometry")
+    return gpd.GeoDataFrame(
+        pd.DataFrame(columns=["chipid", "geometry"]), geometry="geometry"
+    )
 
 
 @dataclass
@@ -33,7 +36,7 @@ class DynamicWorldBasemap:
 
     def __post_init__(self):
         authenticate()
-        
+
         self.DBMS = DBMS()
 
         params = {"_AREA_": self.area_name, "_NUM_DATES_": str(len(self.date_ranges))}

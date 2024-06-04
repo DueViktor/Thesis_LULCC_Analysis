@@ -130,7 +130,11 @@ def project(X: np.ndarray, n_components=5, verbose=True) -> np.ndarray:
     - n_components: The number of components to project the data into. Default value is 2.
     """
     embedding = pacmap.PaCMAP(
-        n_components=n_components, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0, random_state=42
+        n_components=n_components,
+        n_neighbors=None,
+        MN_ratio=0.5,
+        FP_ratio=2.0,
+        random_state=42,
     )
     X_transformed: np.ndarray = embedding.fit_transform(X, init="pca")
 
@@ -153,7 +157,7 @@ def cluster(X_transformed: np.ndarray, n_clusters=5, verbose=True) -> KMeans:
     Returns:
     - KMeans: An instance of sklearn's KMeans class after fitting it to the clustered data. This object contains information about the cluster centers and labels.
     """
-    kmeans = KMeans(n_clusters=n_clusters,random_state=42, init="k-means++")
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, init="k-means++")
     kmeans.fit(X_transformed)
 
     if verbose:
